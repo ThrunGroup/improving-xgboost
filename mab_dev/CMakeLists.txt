@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.18)
+project(dummy)
+find_package(xgboost REQUIRED)
+add_executable(dummy dummy.cc)
+target_link_libraries(dummy xgboost::xgboost)
