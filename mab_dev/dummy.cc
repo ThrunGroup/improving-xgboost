@@ -4,6 +4,9 @@
 #include <xgboost/c_api.h>
 #include <iostream>
 
+#include "xgboost/learner.h"
+#include "xgboost/data.h"
+
 // always check the return value of C API functions
 #define safe_xgboost(call) {  \
   int err = (call); \
@@ -44,7 +47,10 @@ int main(int argc, char** argv) {
   const char* eval_result = NULL;
   for (int i = 0; i < num_of_iterations; ++i) {
     // Update the model performance for each iteration
-    safe_xgboost(XGBoosterUpdateOneIter(booster, i, dmatrix));
+    // safe_xgboost(XGBoosterUpdateOneIter(booster, i, dmatrix));
+    auto* bst = static_cast<xgboost::Learner*>(booster);
+    auto *dtr = static_cast<std::shared_ptr<xgboost::DMatrix> *>(dmatrix);
+    bst->UpdateOneIter(i, *dtr);
    
     // Give the statistics for the learner for training & testing dataset in terms of error after each iteration
     safe_xgboost(XGBoosterEvalOneIter(booster, i, eval_dmats, eval_names, eval_dmats_size, &eval_result));
