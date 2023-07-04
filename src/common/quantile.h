@@ -103,6 +103,8 @@ struct WQSummary {
       }
     }
     inline void MakeSummary(WQSummary *out) {
+      printf("MakeSummary\n");
+
       std::sort(queue.begin(), queue.begin() + qtail);
       out->size = 0;
       // start update sketch
@@ -143,6 +145,8 @@ struct WQSummary {
    * \param istart starting position
    */
   inline Entry Query(DType qvalue, size_t &istart) const { // NOLINT(*)
+    printf("Query\n");
+
     while (istart < size && qvalue > data[istart].value) {
       ++istart;
     }

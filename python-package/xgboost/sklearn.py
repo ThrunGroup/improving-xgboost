@@ -524,6 +524,9 @@ def _wrap_evaluation_matrices(
 ) -> Tuple[Any, List[Tuple[Any, str]]]:
     """Convert array_like evaluation matrices into DMatrix.  Perform validation on the
     way."""
+    print("sklearn.py/_wrap_evaluation_matrices")
+
+    print("create_dmatrix called in _wrap_evaluation_matrices")
     train_dmatrix = create_dmatrix(
         data=X,
         label=y,
@@ -537,6 +540,7 @@ def _wrap_evaluation_matrices(
         feature_types=feature_types,
         ref=None,
     )
+    print("after create_dmatrix")
 
     n_validation = 0 if eval_set is None else len(eval_set)
 
@@ -945,6 +949,8 @@ class XGBModel(XGBModelBase):
 
     def _create_dmatrix(self, ref: Optional[DMatrix], **kwargs: Any) -> DMatrix:
         # Use `QuantileDMatrix` to save memory.
+        print("sklearn.py/XGBModel/_create_dmatrix called")
+
         if self.tree_method in ("hist", "gpu_hist"):
             try:
                 return QuantileDMatrix(
@@ -1475,6 +1481,8 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
                     f"Expected: {expected_classes}, got {classes}"
                 )
 
+            print("XGBClassifier.fit")
+
             params = self.get_xgb_params()
 
             if callable(self.objective):
@@ -1499,6 +1507,8 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
             ) = self._configure_fit(
                 xgb_model, eval_metric, params, early_stopping_rounds, callbacks
             )
+
+            print("sklearn.py/_wrap_evaluation_matrices called")
             train_dmatrix, evals = _wrap_evaluation_matrices(
                 missing=self.missing,
                 X=X,
@@ -1518,6 +1528,7 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
                 feature_types=self.feature_types,
             )
 
+            print("sklearn.py/train called")
             self._Booster = train(
                 params,
                 train_dmatrix,

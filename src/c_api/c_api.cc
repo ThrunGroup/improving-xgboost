@@ -350,11 +350,13 @@ XGB_DLL int XGQuantileDMatrixCreateFromCallback(DataIterHandle iter, DMatrixHand
   auto jconfig = Json::Load(StringView{config});
   auto missing = GetMissing(jconfig);
   auto n_threads = OptionalArg<Integer, int64_t>(jconfig, "nthread", 0);
-  auto max_bin = OptionalArg<Integer, int64_t>(jconfig, "max_bin", 256);
+  auto max_bin = OptionalArg<Integer, int64_t>(jconfig, "max_bin", 256); //some kind of regularization?
 
   xgboost_CHECK_C_ARG_PTR(next);
   xgboost_CHECK_C_ARG_PTR(reset);
   xgboost_CHECK_C_ARG_PTR(out);
+
+  printf("c_api.cc/XGQuantileDMatrixCreateFromCallback\n");
 
   *out = new std::shared_ptr<xgboost::DMatrix>{
       xgboost::DMatrix::Create(iter, proxy, _ref, reset, next, missing, n_threads, max_bin)};

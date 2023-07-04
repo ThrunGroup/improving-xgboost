@@ -207,6 +207,15 @@ void RowsWiseBuildHistKernel(Span<GradientPair const> gpair,
   constexpr bool kFirstPage = BuildingManager::kFirstPage;
   using BinIdxType = typename BuildingManager::BinIdxType;
 
+  printf("RowsWiseBuildHistKernel \n");
+
+
+  // printf("Row indices:\n");
+  // for(const auto &elem : row_indices){
+  //   printf("%d ", elem);
+  // }
+  // printf("\n");
+
   const size_t size = row_indices.Size();
   const size_t *rid = row_indices.begin;
   auto const *pgh = reinterpret_cast<const float *>(gpair.data());

@@ -4,6 +4,10 @@
  * \brief use quantized feature values to construct a tree
  * \author Philip Cho, Tianqi Checn, Egor Smirnov
  */
+
+#include <stdio.h>
+
+
 #include <algorithm>                         // for max, copy, transform
 #include <cstddef>                           // for size_t
 #include <cstdint>                           // for uint32_t, int32_t
@@ -54,6 +58,10 @@ template <typename ExpandEntry, typename Updater>
 void UpdateTree(common::Monitor *monitor_, linalg::MatrixView<GradientPair const> gpair,
                 Updater *updater, DMatrix *p_fmat, TrainParam const *param,
                 HostDeviceVector<bst_node_t> *p_out_position, RegTree *p_tree) {
+
+  printf("updater_quantile_hist.cc/UpdateTree\n");
+
+
   monitor_->Start(__func__);
   updater->InitData(p_fmat, p_tree);
 
@@ -408,6 +416,28 @@ class HistBuilder {
     auto ft = p_fmat->Info().feature_types.ConstHostSpan();
     for (auto const &gmat : p_fmat->GetBatches<GHistIndexMatrix>(ctx_, HistBatch(param_))) {
       evaluator_->EvaluateSplits(histograms, gmat.cut, ft, *p_tree, best_splits);
+
+      // printf("cut_values: \n");
+
+      // int cut_ptr_idx = 0;
+      // for (auto const &elem : gmat.cut.Values()){
+      //   printf("%d. %.1f\n", cut_ptr_idx, elem);
+      //   cut_ptr_idx++;
+      // }
+      // printf("\n");
+
+      // printf("cut_ptrs_: ");
+      // for (auto const &elem : gmat.cut.Ptrs()){
+      //   printf("%d ", elem);
+      // }
+      // printf("\n");
+
+      // printf("min_vals: ");
+      // for (auto const &elem : gmat.cut.MinValues()){
+      // printf("%.3f ", elem);
+      // }
+      // printf("\n");
+
       break;
     }
     monitor_->Stop(__func__);
@@ -483,9 +513,18 @@ class HistBuilder {
   void BuildHistogram(DMatrix *p_fmat, RegTree *p_tree,
                       std::vector<CPUExpandEntry> const &valid_candidates,
                       linalg::MatrixView<GradientPair const> gpair) {
+    printf("BuildHistogram\n");
+
+
     monitor_->Start(__func__);
     std::vector<CPUExpandEntry> nodes_to_build(valid_candidates.size());
     std::vector<CPUExpandEntry> nodes_to_sub(valid_candidates.size());
+
+    printf("updater_quantile_hist.cc/valid_candidates nids:\n");
+    for (auto const &c : valid_candidates){
+      printf("%d ", c.nid);
+    }
+    printf("\n");
 
     std::size_t n_idx = 0;
     for (auto const &c : valid_candidates) {
@@ -502,6 +541,18 @@ class HistBuilder {
       nodes_to_sub[n_idx] = CPUExpandEntry{subtract_nidx, p_tree->GetDepth(subtract_nidx), {}};
       n_idx++;
     }
+
+    printf("updater_quantile_hist.cc/nodes_to_build: ");
+    for (auto const &c : nodes_to_build){
+      printf("%d ", c.nid);
+    }
+    printf("\n");
+
+    printf("updater_quantile_hist.cc/nodes_to_sub: ");
+    for (auto const &c : nodes_to_sub){
+      printf("%d ", c.nid);
+    }
+    printf("\n");
 
     std::size_t page_id{0};
     auto space = ConstructHistSpace(partitioner_, nodes_to_build);
@@ -561,6 +612,9 @@ class QuantileHistMaker : public TreeUpdater {
   void Update(TrainParam const *param, HostDeviceVector<GradientPair> *gpair, DMatrix *p_fmat,
               common::Span<HostDeviceVector<bst_node_t>> out_position,
               const std::vector<RegTree *> &trees) override {
+    printf("QuantileHistMaker Update called\n");
+
+
     if (trees.front()->IsMultiTarget()) {
       CHECK(param->monotone_constraints.empty()) << "monotone constraint" << MTNotImplemented();
       if (!p_mtimpl_) {

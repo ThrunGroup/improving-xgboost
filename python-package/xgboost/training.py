@@ -163,6 +163,8 @@ def train(
     Booster : a trained booster model
     """
 
+    print("training.py/train")
+
     callbacks = [] if callbacks is None else copy.copy(list(callbacks))
     metric_fn = _configure_custom_metric(feval, custom_metric)
     evals = list(evals) if evals else []

@@ -929,6 +929,7 @@ template <typename DataIterHandle, typename DMatrixHandle, typename DataIterRese
 DMatrix* DMatrix::Create(DataIterHandle iter, DMatrixHandle proxy, std::shared_ptr<DMatrix> ref,
                          DataIterResetCallback* reset, XGDMatrixCallbackNext* next, float missing,
                          int nthread, bst_bin_t max_bin) {
+  printf("data.cc(L932)\n");
   return new data::IterativeDMatrix(iter, proxy, ref, reset, next, missing, nthread, max_bin);
 }
 
@@ -958,6 +959,8 @@ template DMatrix *DMatrix::Create<DataIterHandle, DMatrixHandle,
 template <typename AdapterT>
 DMatrix* DMatrix::Create(AdapterT* adapter, float missing, int nthread, const std::string&,
                          DataSplitMode data_split_mode) {
+  printf("data.cc(L961)\n");
+
   return new data::SimpleDMatrix(adapter, missing, nthread, data_split_mode);
 }
 

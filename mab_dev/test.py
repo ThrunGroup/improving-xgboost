@@ -10,7 +10,7 @@ X_train, X_test, y_train, y_test = train_test_split(data['data'], data['target']
 X_train, X_test = X_train[:, 0:1], X_test[:, 0:1]
 
 
-bst = XGBClassifier(n_estimators=1, max_depth=2, learning_rate=1, objective='binary:logistic', tree_method="hist")
+bst = XGBClassifier(n_estimators=1, max_depth=1, learning_rate=1, objective='binary:logistic', tree_method="hist")
 
 
 bst.fit(X_train, y_train)
