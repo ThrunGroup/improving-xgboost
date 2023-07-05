@@ -306,7 +306,10 @@ void SketchContainerImpl<WQSketch>::AllReduce(
       intermediate_num_cuts = categories_[i].size();
     } else {
       typename WQSketch::SummaryContainer out;
-      sketches_[i].GetSummary(&out);
+
+      printf("quantile.cc/AllReduce->GetSummary called\n");
+
+      sketches_[i].GetSummary(&out);  //this is where MakeSummary is called
       reduced[i].Reserve(intermediate_num_cuts);
       CHECK(reduced[i].data);
       reduced[i].SetPrune(out, intermediate_num_cuts);
@@ -384,14 +387,20 @@ auto AddCategories(std::set<float> const &categories, HistogramCuts *cuts) {
 
 template <typename WQSketch>
 void SketchContainerImpl<WQSketch>::MakeCuts(MetaInfo const &info, HistogramCuts *p_cuts) {
+  printf("quantile.cc/SketchContainerImpl.MakeCuts\n");
+  printf("n_threads: %d\n", n_threads_);
+
   monitor_.Start(__func__);
   std::vector<typename WQSketch::SummaryContainer> reduced;
   std::vector<int32_t> num_cuts;
+  printf("checkpoint0\n");
   this->AllReduce(info, &reduced, &num_cuts);
+
+  printf("checkpoint\n");
 
   p_cuts->min_vals_.HostVector().resize(sketches_.size(), 0.0f);
   std::vector<typename WQSketch::SummaryContainer> final_summaries(reduced.size());
-
+  
   ParallelFor(reduced.size(), n_threads_, Sched::Guided(), [&](size_t fidx) {
     if (IsCat(feature_types_, fidx)) {
       return;

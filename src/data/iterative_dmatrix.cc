@@ -117,6 +117,8 @@ void SyncFeatureType(std::vector<FeatureType>* p_h_ft) {
 void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
                                    DataIterHandle iter_handle, float missing,
                                    std::shared_ptr<DMatrix> ref) {
+  printf("iterative_dmatrix.cc/InitFromCPU\n");
+
   DMatrixProxy* proxy = MakeProxy(proxy_);
   CHECK(proxy);
 

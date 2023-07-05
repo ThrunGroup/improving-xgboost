@@ -1457,6 +1457,8 @@ class QuantileDMatrix(DMatrix):
         config = make_jcargs(
             nthread=self.nthread, missing=self.missing, max_bin=self.max_bin
         )
+
+        print("QuantileDMatrix._init checkpoint")
         ret = _LIB.XGQuantileDMatrixCreateFromCallback(
             None,
             it.proxy.handle,
@@ -1913,6 +1915,8 @@ class Booster:
             Customized objective function.
 
         """
+        print("core.py/Booster.update")
+        
         if not isinstance(dtrain, DMatrix):
             raise TypeError(f"invalid training matrix: {type(dtrain).__name__}")
         self._validate_dmatrix_features(dtrain)

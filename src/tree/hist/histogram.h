@@ -113,6 +113,7 @@ class HistogramBuilder {
                  std::vector<ExpandEntry> const &nodes_for_explicit_hist_build,
                  std::vector<ExpandEntry> const &nodes_for_subtraction_trick,
                  common::Span<GradientPair const> gpair, bool force_read_by_column = false) {
+
     int starting_index = std::numeric_limits<int>::max();
     int sync_count = 0;
     if (page_id == 0) {

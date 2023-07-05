@@ -1275,6 +1275,7 @@ class LearnerImpl : public LearnerIO {
   }
 
   void UpdateOneIter(int iter, std::shared_ptr<DMatrix> train) override {
+    printf("src/learner.cc/UpdateOneIter\n");
     monitor_.Start("UpdateOneIter");
     TrainingObserver::Instance().Update(iter);
     this->Configure();
