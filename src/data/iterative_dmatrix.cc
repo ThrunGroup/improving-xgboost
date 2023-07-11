@@ -136,6 +136,8 @@ void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
 
   std::vector<std::size_t> column_sizes;
   auto const is_valid = data::IsValidFunctor{missing};
+
+  // TODO: what is nnz_cnt???
   auto nnz_cnt = [&]() {
     return HostAdapterDispatch(proxy, [&](auto const& value) {
       size_t n_threads = ctx->Threads();
@@ -184,6 +186,9 @@ void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
     } else {
       CHECK_EQ(n_features, num_cols()) << "Inconsistent number of columns.";
     }
+
+    printf("\n\n ==> num_rows, num_cols => %d, %d \n\n", num_rows(), num_cols());
+
     size_t batch_size = num_rows();
     batch_nnz.push_back(nnz_cnt());
     nnz += batch_nnz.back();
@@ -196,6 +201,7 @@ void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
   Info().num_row_ = accumulated_rows;
   Info().num_nonzero_ = nnz;
   Info().SynchronizeNumberOfColumns();
+
   CHECK(std::none_of(column_sizes.cbegin(), column_sizes.cend(), [&](auto f) {
     return f > accumulated_rows;
   })) << "Something went wrong during iteration.";
@@ -223,6 +229,8 @@ void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
         proxy->Info().num_nonzero_ = batch_nnz[i];
         // We don't need base row idx here as Info is from proxy and the number of rows in
         // it is consistent with data batch.
+        
+        // TODO: currently batch = org dataset 
         p_sketch->PushAdapterBatch(batch, 0, proxy->Info(), missing);
       });
       accumulated_rows += num_rows();
@@ -232,6 +240,7 @@ void IterativeDMatrix::InitFromCPU(Context const* ctx, BatchParam const& p,
     CHECK_EQ(accumulated_rows, Info().num_row_);
 
     CHECK(p_sketch);
+    printf("===>>> calling MakeCuts in iterative_dmatrix.cc \n");
     p_sketch->MakeCuts(Info(), &cuts);
   }
   if (!h_ft.empty()) {

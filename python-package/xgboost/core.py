@@ -1444,6 +1444,7 @@ class QuantileDMatrix(DMatrix):
         if _is_iter(data):
             it = data
         else:
+            print("calling SingleBatchInternalIter")
             it = SingleBatchInternalIter(data=data, **meta)
 
         handle = ctypes.c_void_p()
@@ -1458,7 +1459,7 @@ class QuantileDMatrix(DMatrix):
             nthread=self.nthread, missing=self.missing, max_bin=self.max_bin
         )
 
-        print("QuantileDMatrix._init checkpoint")
+        print("QuantileDMatrix._init checkpoint\n\n")
         ret = _LIB.XGQuantileDMatrixCreateFromCallback(
             None,
             it.proxy.handle,

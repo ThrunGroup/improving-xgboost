@@ -1481,7 +1481,7 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
                     f"Expected: {expected_classes}, got {classes}"
                 )
 
-            print("XGBClassifier.fit")
+            print("calling XGBClassifier.fit")
 
             params = self.get_xgb_params()
 
@@ -1508,7 +1508,7 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
                 xgb_model, eval_metric, params, early_stopping_rounds, callbacks
             )
 
-            print("sklearn.py/_wrap_evaluation_matrices called")
+            print("fit function -> _wrap_evaluation_matrices called... returns train_dmatrix")
             train_dmatrix, evals = _wrap_evaluation_matrices(
                 missing=self.missing,
                 X=X,
@@ -1528,10 +1528,10 @@ class XGBClassifier(XGBModel, XGBClassifierMixIn, XGBClassifierBase):
                 feature_types=self.feature_types,
             )
 
-            print("sklearn.py/train called")
+            print("fit -> sklearn.py/train called")
             self._Booster = train(
                 params,
-                train_dmatrix,
+                train_dmatrix, # QuantileDMatrix object --> relevant info stored in self.handle
                 self.get_num_boosting_rounds(),
                 evals=evals,
                 early_stopping_rounds=early_stopping_rounds,

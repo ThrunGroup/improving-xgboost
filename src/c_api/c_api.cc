@@ -337,6 +337,7 @@ XGB_DLL int XGQuantileDMatrixCreateFromCallback(DataIterHandle iter, DMatrixHand
                                                 XGDMatrixCallbackNext *next, char const *config,
                                                 DMatrixHandle *out) {
   API_BEGIN();
+  printf("c_api.cc/XGQuantileDMatrixCreateFromCallback\n");
   std::shared_ptr<DMatrix> _ref{nullptr};
   if (ref) {
     auto pp_ref = static_cast<std::shared_ptr<xgboost::DMatrix> *>(ref);
@@ -355,8 +356,6 @@ XGB_DLL int XGQuantileDMatrixCreateFromCallback(DataIterHandle iter, DMatrixHand
   xgboost_CHECK_C_ARG_PTR(next);
   xgboost_CHECK_C_ARG_PTR(reset);
   xgboost_CHECK_C_ARG_PTR(out);
-
-  printf("c_api.cc/XGQuantileDMatrixCreateFromCallback\n");
 
   *out = new std::shared_ptr<xgboost::DMatrix>{
       xgboost::DMatrix::Create(iter, proxy, _ref, reset, next, missing, n_threads, max_bin)};

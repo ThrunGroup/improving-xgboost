@@ -62,6 +62,8 @@
 #include "xgboost/string_view.h"          // for operator<<, StringView
 #include "xgboost/task.h"                 // for ObjInfo
 
+#include "data/iterative_dmatrix.h"
+
 namespace {
 const char* kMaxDeltaStepDefaultValue = "0.7";
 }  // anonymous namespace
@@ -1275,7 +1277,8 @@ class LearnerImpl : public LearnerIO {
   }
 
   void UpdateOneIter(int iter, std::shared_ptr<DMatrix> train) override {
-    printf("src/learner.cc/UpdateOneIter\n");
+    printf("=> START /UpdateOneIter\n");
+
     monitor_.Start("UpdateOneIter");
     TrainingObserver::Instance().Update(iter);
     this->Configure();
@@ -1289,18 +1292,42 @@ class LearnerImpl : public LearnerIO {
 
     auto& predt = prediction_container_.Cache(train, ctx_.gpu_id);
 
-    monitor_.Start("PredictRaw");
-    this->PredictRaw(train.get(), &predt, true, 0, 0);
-    TrainingObserver::Instance().Observe(predt.predictions, "Predictions");
-    monitor_.Stop("PredictRaw");
+    // ===================================== START
+    // monitor_.Start("PredictRaw");
 
-    monitor_.Start("GetGradient");
-    GetGradient(predt.predictions, train->Info(), iter, &gpair_);
-    monitor_.Stop("GetGradient");
-    TrainingObserver::Instance().Observe(gpair_, "Gradients");
+    
+    // // TODO: Is this correct?
+    // // std::shared_ptr<data::IterativeDMatrix> derivedSharedPtr = std::dynamic_pointer_cast<data::IterativeDMatrix>(train);
+    // // data::IterativeDMatrix* rawPtr = derivedSharedPtr.get();
+    // // int arr[3] = {1,2,3};
+    // // common::Span<int> ridxs(arr, 3);
+
+    // // MetaInfo mi = rawPtr->Info().Slice(ridxs);
+    // // rawPtr->SetInfoDirect(std::move(mi));
+    // // this->PredictRaw(rawPtr, &predt, true, 0, 0);
+    // this->PredictRaw(train.get(), &predt, true, 0, 0);
+
+    // printf("\n\n SIZE OF PREDICTIONS: %lu \n\n", sizeof(predt.predictions));
+
+
+    // TrainingObserver::Instance().Observe(predt.predictions, "Predictions");
+    // monitor_.Stop("PredictRaw");
+
+    // monitor_.Start("GetGradient");
+
+    // // TODO:
+    // //    - slice the meta Info using sample indices (method already exists?)
+    // //    - most likely method exists in train to slice
+    // GetGradient(predt.predictions, train->Info(), iter, &gpair_);
+    // monitor_.Stop("GetGradient");
+    // TrainingObserver::Instance().Observe(gpair_, "Gradients");
+
+    // // ===================================== END
 
     gbm_->DoBoost(train.get(), &gpair_, &predt, obj_.get());
     monitor_.Stop("UpdateOneIter");
+
+    printf("=> end UpdateOneIter\n");
   }
 
   void BoostOneIter(int iter, std::shared_ptr<DMatrix> train,

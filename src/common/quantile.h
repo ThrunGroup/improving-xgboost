@@ -846,6 +846,9 @@ class SketchContainerImpl {
     auto thread_columns_ptr = LoadBalance(batch, nnz, n_features, n_threads_, is_valid);
 
     dmlc::OMPException exc;
+
+    printf("\n\n ==> [in PushRowPageImpl] batchsize is %d \n\n", batch.Size());
+
 #pragma omp parallel num_threads(n_threads_)
     {
       exc.Run([&]() {

@@ -74,6 +74,9 @@ class IterativeDMatrix : public DMatrix {
                    float missing, std::shared_ptr<DMatrix> ref);
 
  public:
+
+  void SetInfoDirect(MetaInfo&& info) { info_ = std::move(info); }
+
   explicit IterativeDMatrix(DataIterHandle iter_handle, DMatrixHandle proxy,
                             std::shared_ptr<DMatrix> ref, DataIterResetCallback *reset,
                             XGDMatrixCallbackNext *next, float missing, int nthread,

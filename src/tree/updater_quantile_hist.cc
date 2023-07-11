@@ -59,8 +59,8 @@ void UpdateTree(common::Monitor *monitor_, linalg::MatrixView<GradientPair const
                 Updater *updater, DMatrix *p_fmat, TrainParam const *param,
                 HostDeviceVector<bst_node_t> *p_out_position, RegTree *p_tree) {
 
-  printf("updater_quantile_hist.cc/UpdateTree\n");
-
+  printf("            ...UpdateTree\n"); 
+  // TODO: pass in use_mab as a flag
 
   monitor_->Start(__func__);
   updater->InitData(p_fmat, p_tree);
@@ -79,37 +79,45 @@ void UpdateTree(common::Monitor *monitor_, linalg::MatrixView<GradientPair const
    *   Not applied: That node is root of the subtree, same rule as root.
    *   Applied: Ditto
    */
-  while (!expand_set.empty()) {
+  while (!expand_set.empty()) { // TODO: expand_set is the collection of nodes that can be potentially split????
     // candidates that can be further splited.
     std::vector<ExpandEntry> valid_candidates;
-    // candidaates that can be applied.
+    // candidates that can be applied.
     std::vector<ExpandEntry> applied;
-    for (auto const &candidate : expand_set) {
-      updater->ApplyTreeSplit(candidate, p_tree);
-      CHECK_GT(p_tree->LeftChild(candidate.nid), candidate.nid);
-      applied.push_back(candidate);
-      if (driver.IsChildValid(candidate)) {
-        valid_candidates.emplace_back(candidate);
+    
+    
+    if (use_mab) { 
+      for (auto const &candidate : expand_set) {
+        MABSplit(candidate);
       }
     }
 
-    updater->UpdatePosition(p_fmat, p_tree, applied);
-
-    std::vector<ExpandEntry> best_splits;
-    if (!valid_candidates.empty()) {
-      updater->BuildHistogram(p_fmat, p_tree, valid_candidates, gpair);
-      for (auto const &candidate : valid_candidates) {
-        auto left_child_nidx = tree.LeftChild(candidate.nid);
-        auto right_child_nidx = tree.RightChild(candidate.nid);
-        ExpandEntry l_best{left_child_nidx, tree.GetDepth(left_child_nidx)};
-        ExpandEntry r_best{right_child_nidx, tree.GetDepth(right_child_nidx)};
-        best_splits.push_back(l_best);
-        best_splits.push_back(r_best);
+    else:
+      for (auto const &candidate : expand_set) { // TODO: verification happens here?
+        updater->ApplyTreeSplit(candidate, p_tree);    
+        CHECK_GT(p_tree->LeftChild(candidate.nid), candidate.nid);
+        applied.push_back(candidate);
+        if (driver.IsChildValid(candidate)) {
+          valid_candidates.emplace_back(candidate);
+        }
       }
-      updater->EvaluateSplits(p_fmat, p_tree, &best_splits);
-    }
-    driver.Push(best_splits.begin(), best_splits.end());
-    expand_set = driver.Pop();
+
+      updater->UpdatePosition(p_fmat, p_tree, applied);
+      std::vector<ExpandEntry> best_splits;
+      if (!valid_candidates.empty()) {
+        updater->BuildHistogram(p_fmat, p_tree, valid_candidates, gpair);
+        for (auto const &candidate : valid_candidates) {
+          auto left_child_nidx = tree.LeftChild(candidate.nid);
+          auto right_child_nidx = tree.RightChild(candidate.nid);
+          ExpandEntry l_best{left_child_nidx, tree.GetDepth(left_child_nidx)};
+          ExpandEntry r_best{right_child_nidx, tree.GetDepth(right_child_nidx)};
+          best_splits.push_back(l_best);
+          best_splits.push_back(r_best);
+        }
+        updater->EvaluateSplits(p_fmat, p_tree, &best_splits); 
+      }
+      driver.Push(best_splits.begin(), best_splits.end());
+      expand_set = driver.Pop();
   }
 
   auto &h_out_position = p_out_position->HostVector();
@@ -612,7 +620,8 @@ class QuantileHistMaker : public TreeUpdater {
   void Update(TrainParam const *param, HostDeviceVector<GradientPair> *gpair, DMatrix *p_fmat,
               common::Span<HostDeviceVector<bst_node_t>> out_position,
               const std::vector<RegTree *> &trees) override {
-    printf("QuantileHistMaker Update called\n");
+    printf("        ...QuantileHistMaker Update called\n");
+    // TODO: get rid of all gradient related variables
 
 
     if (trees.front()->IsMultiTarget()) {

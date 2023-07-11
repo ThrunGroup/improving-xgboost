@@ -190,7 +190,7 @@ void GBTree::UpdateTreeLeaf(DMatrix const* p_fmat, HostDeviceVector<float> const
 
 void GBTree::DoBoost(DMatrix* p_fmat, HostDeviceVector<GradientPair>* in_gpair,
                      PredictionCacheEntry* predt, ObjFunction const* obj) {
-  printf("src/gbm/gbtree.cc/DoBoost\n");
+  printf("=> calling DoBoost\n");
 
   TreesOneIter new_trees;
   bst_target_t const n_groups = model_.learner_model_param->OutputLength();
@@ -306,7 +306,7 @@ void GBTree::InitUpdater(Args const& cfg) {
 void GBTree::BoostNewTrees(HostDeviceVector<GradientPair>* gpair, DMatrix* p_fmat, int bst_group,
                            std::vector<HostDeviceVector<bst_node_t>>* out_position,
                            TreesOneGroup* ret) {
-  printf("src/gbm/gbtree.cc/BoostNewTrees\n");
+  printf("    ...calling BoostNewTrees\n");
 
   std::vector<RegTree*> new_trees;
   ret->clear();
